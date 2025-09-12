@@ -3,8 +3,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from pathlib import Path
 
-# Carpeta del microservicio (donde está este db.py)
-BASE_DIR = Path(__file__).resolve().parent
+# __file__ = ruta del archivo, Path() la convierte en objeto Path, resolve() obtiene la ruta absoluta, parent devuelve la carpeta contenedora
+BASE_DIR = Path(__file__).resolve().parent 
+
 
 # Nombre del archivo de la BD (puedes cambiar via .env si querés)
 DB_FILE = os.getenv("DB_FILE", "auth.db")  # en productos será "productos.db", etc.
