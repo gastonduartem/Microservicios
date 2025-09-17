@@ -7,12 +7,27 @@ from .models import Product, Stock
 import os
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-# ---------------- Config JWT ----------------
-SECRET_KEY = os.getenv("SECRET_KEY", "changeme")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-oauth2_scheme = HTTPBearer()
+import os, time, requests, hashlib
+from pathlib import Path
+from dotenv import load_dotenv, dotenv_values
 
+# Cargar SIEMPRE el .env local (no el de la raíz)
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+
+
+load_dotenv(dotenv_path=ENV_PATH, override=True)   # variables al entorno
+
+# Prioriza lo que diga pedidos/.env; si no hay, toma del entorno
+SECRET_KEY    = os.getenv("SECRET_KEY")
+ALGORITHM     = os.getenv("ALGORITHM", "HS256")
+PRODUCTOS_URL = os.getenv("PRODUCTOS_URL", "http://127.0.0.1:8002")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY no está definida en pedidos/.env ni en el entorno")
+
+oauth2_scheme = HTTPBearer()
 app = FastAPI(title="Productos Service")
+
 
 # ---------------- DB init ----------------
 Base.metadata.create_all(bind=engine)
@@ -31,9 +46,7 @@ class CurrentUser:
         self.id = user_id
         self.role = role
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
-) -> CurrentUser:
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> CurrentUser:
     # Aseguramos que sea "Bearer"
     if not credentials or credentials.scheme.lower() != "bearer":
         raise HTTPException(status_code=401, detail="Invalid auth scheme")

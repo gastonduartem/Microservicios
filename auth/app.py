@@ -12,12 +12,37 @@ from .db import Base, engine, SessionLocal
 from .models import User
 import os
 
+import os, time, requests, hashlib
+from pathlib import Path
+from dotenv import load_dotenv, dotenv_values
+
+# Cargar SIEMPRE el .env local (no el de la raíz)
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+print("[PEDIDOS] .env path:", ENV_PATH, "exists:", ENV_PATH.exists())
+
+load_dotenv(dotenv_path=ENV_PATH, override=True)   # variables al entorno
+
+
 # Busca la secret key en mi archivo, si no utiliza el changeme por defecto
 SECRET_KEY = os.getenv("SECRET_KEY", "changeme")
 # lo mismo que el de arriba. Define como se firma el token
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 # define cuanto tiempo dura un token antes de expirar
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY no está definida en pedidos/.env ni en el entorno")
+
+# Diagnóstico: longitud y bytes iniciales (no imprime la clave en claro)
+print(
+    "[SERVICE] PEDIDOS",
+    "KEY:", hashlib.sha256(SECRET_KEY.encode()).hexdigest()[:12],
+    "LEN:", len(SECRET_KEY),
+    "BYTES0-4:", list(SECRET_KEY.encode()[:5]),
+    "ALG:", ALGORITHM
+)
+
+
 
 # Crea el hashing de las contraseñas | usa bcrypt como algoritmo de hashing | Si en algún momento definís varios algoritmos en schemes, Automáticamente marcará como "deprecados" los que no sean el primero, podés migrar contraseñas viejas a un algoritmo más seguro cuando los usuarios vuelvan a loguearse
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

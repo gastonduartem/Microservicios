@@ -13,7 +13,7 @@ class Product(Base):
     is_active = Column(Boolean, default=True)
 
     # Esa línea crea una relación 1 a 1 entre Product y Stock, permitiendo navegar en ambos sentidos, relacion 1 a 1. uselist: asegura que product.stock devuelva un único objeto, no una lista
-    stock = relationship("Stock", back_populates="product", uselist=False)\
+    stock = relationship("Stock", back_populates="product", uselist=False)
     # Esa línea asegura que no puedas tener dos productos con el mismo nombre y tamaño en kilos, manteniendo la integridad de los datos
     __table_args__ = (UniqueConstraint("name", "size_kg", name="uq_name_size"),)
 
