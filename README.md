@@ -44,3 +44,4 @@ pip install -r requirements.txt
 
 # 3. Correr un servicio (ejemplo: auth)
 uvicorn auth.app:app --reload --port 8000
+
